@@ -34,7 +34,7 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
         color_max = (int) IJ.getNumber("Please enter the maximal value (less than 255): ", COLOR_MAX_DEFAULT);
         
         // let the user input the percentage to pull at least x% to min/max value
-        percentage = (int) IJ.getNumber("Please enter the minimal value (at least 0, at most 100): ", PERCENTAGE_DEFAULT);
+        percentage = (int) IJ.getNumber("Please enter the minimal value (at least 0, at most 49): ", PERCENTAGE_DEFAULT);
        
         
         // check if the minimal value is less than the maximal value or <0 or >255
@@ -51,9 +51,10 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
             IJ.showMessage("Error", "The maximal value is higher than 255!\nThe Default Value (255) will be used");
             color_max = COLOR_MAX_DEFAULT;                    
         }
-        if(percentage > 0 && percentage < 100) {
+        if(percentage > 0 && percentage < 49) {
 	        //get histogramm
 	        int[] histogram = ip.getHistogram();
+	        //calculate amount of pixels needed to reach x%
 	        int pixelAmount = (int) Math.ceil(ip.getPixelCount() * percentage / 100.0);
 	        
         
@@ -63,26 +64,27 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
 	        //the amount of pixels in the lowest/highest values
 	        int minSum = histogram[0];
 	        int maxSum = histogram[255];
-	        //add 
+	        //add up lowest gray shades until pixel amount needed for x% is reached
 	        while(minSum < pixelAmount) {
 	        	minThreshold++;
 	        	minSum += histogram[minThreshold];
 	        }
-	        //
+	        //add up highest gray shades until pixel amount needed for x% is reached
 	        while(maxSum < pixelAmount) {
 	        	maxThreshold--;
 	        	maxSum += histogram[maxThreshold];
 	        }
         } else {
+        	//use normal linear contrast modification
+        	 if (percentage != 0) {
+                 IJ.showMessage("Error", "The percentage value was out of bounds!\n0% will be used");                    
+             }
         	color_high = (int) ip.getMax();
             color_low = (int) ip.getMin();
         	
         	maxThreshold = color_high;
         	minThreshold = color_low;
         }
-        
-        
-        
 
         int new_p;
         // iterate over all image coordinates (u,v)
@@ -90,18 +92,15 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
             for (int v = 0; v < N; v++) {
                 int p = ip.getPixel(u, v);
                 
-                if(p < minThreshold) {
-                	new_p = color_min;
-                } else if( p > maxThreshold){
+                if(p > minThreshold && p < maxThreshold) {
+                	//use linear contrastmodifyer
+                	new_p = color_min + (p-minThreshold)*(color_max-color_min)/(maxThreshold-minThreshold);	
+                } else if( p >= maxThreshold){
                 	new_p = color_max;
                 } else {
-                	//use linear contrastmodifyer
-                	new_p = color_min + (p-minThreshold)*(color_max-color_min)/(maxThreshold-minThreshold);
+                	new_p = color_min;
                 }
                 
-                
-                
-               // new_p = color_min + (p-color_low)*(color_max-color_min)/(color_high-color_low);
                 ip.putPixel(u, v, new_p);
             }
         }
