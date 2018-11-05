@@ -22,7 +22,7 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
         int N = ip.getHeight();
 
         int color_low = 255;
-        int color_high = 0;
+        int color_high = 1;
 
         // let the user input the new min and max value for the image
         color_min = (int) IJ.getNumber("Please enter the minimal value (at least 0): ", COLOR_MIN_DEFAULT);
