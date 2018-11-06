@@ -78,6 +78,7 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
                 int p = ip.getPixel(u, v);
                 
                 if(p > minThreshold && p < maxThreshold) {
+                	//scale values linear over new range
                 	new_p = color_min + (p - minThreshold) * (color_max - color_min) / (maxThreshold - minThreshold);	
                 } else {
                 	new_p = (p >= maxThreshold) ? color_max : color_min;
