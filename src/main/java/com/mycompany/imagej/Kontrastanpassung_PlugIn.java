@@ -117,7 +117,7 @@ public class Kontrastanpassung_PlugIn implements PlugInFilter {
     private boolean getAndCheckPercentage() {              
         percentage = (int) IJ.getNumber("Please enter the percentage (between 0 and 49). If 0 is entered, linear contrast modification will be used: ", PERCENTAGE_DEFAULT);
         
-        if(percentage > 0 && percentage < 49) {
+        if(percentage > 0 && percentage <= 49) {
         	return true;
         }  else {
     		IJ.showMessage("Error", "The percentage value was out of bounds!\nNow linear modification will be used"); 
